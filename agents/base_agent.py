@@ -2,6 +2,7 @@ from typing import TypedDict
 
 
 class GameState(TypedDict):
+    session_id: str
     action: str
     number_games_played: int
     word_games_played: int

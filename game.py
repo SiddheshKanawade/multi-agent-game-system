@@ -1,6 +1,7 @@
 """Simple Multi-Agent Game System with LangGraph - ReAct Design"""
 
 import random
+import uuid
 from typing import Dict, Any, List
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
@@ -72,6 +73,7 @@ def main():
 
     # Initialize state
     current_state = {
+        "session_id": str(uuid.uuid4()),
         "action": "menu",
         "number_games_played": 0,
         "word_games_played": 0,

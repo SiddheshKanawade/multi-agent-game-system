@@ -72,7 +72,8 @@ class SupervisorAgent(ReActAgent):
 
         # ACT: Calculate and display summary
         action = self.act(state, "Generating session summary report")
-        print(f"\nSession Summary:")
+        print(f"\nSession Summary(Should be saved in DB for persistence):")
+        print(f"Session ID: {state.get('session_id', 'N/A')}")
         print(
             f"Word Games Played: {state.get('word_games_played', 0)} | Wins: {state.get('word_wins', 0)}"
         )

@@ -12,7 +12,7 @@ A streamlined LangGraph-based multi-agent system implementing **ReAct (Reasoning
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.12
 - LangGraph
 
 ## Installation
@@ -34,8 +34,7 @@ python game.py
 1. **Choose a game** (1 for Number Game, 2 for Word Game, or blank to exit)
 2. **Number Game**: Think of a number 1-100, answer "yes", "higher", or "lower"
 3. **Word Game**: Pick a word from the list, answer the AI's questions with "yes", "no", or "maybe"
-4. **View your stats** after each game
-5. **Exit** to see session summary
+4. **Exit** to see session summary
 
 ## ReAct Architecture
 
