@@ -1,10 +1,12 @@
-from typing import Dict, Any
+from typing import TypedDict
 
 
-class GameState(Dict[str, Any]):
-    """Simple game state dictionary"""
-
-    pass
+class GameState(TypedDict):
+    action: str
+    number_games_played: int
+    word_games_played: int
+    number_wins: int
+    word_wins: int
 
 
 class ReActAgent:

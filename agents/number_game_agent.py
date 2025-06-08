@@ -13,6 +13,7 @@ class NumberGameAgent(ReActAgent):
             state,
             "Starting number guessing game. Will use binary search strategy for optimal guessing.",
         )
+        print(thought)  # Placeholder to see LLM thinking
         print("\nThink of a number between 1 and 100. I'll try to guess it!")
 
         min_num = 1
@@ -31,6 +32,8 @@ class NumberGameAgent(ReActAgent):
 
             # ACT: Make guess and request feedback
             action = self.act(state, f"Guessing {guess} and requesting user feedback")
+            print(action)  # Placeholder to see LLM acting
+
             print(f"\nIs your number {guess}?")
             response = input("Enter 'yes', 'higher', or 'lower': ").strip().lower()
 

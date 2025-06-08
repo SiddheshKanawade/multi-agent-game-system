@@ -68,7 +68,7 @@ def main():
     print("=" * 50)
 
     # Create game system
-    app = create_game_system()
+    graph = create_game_system()
 
     # Initialize state
     current_state = {
@@ -85,11 +85,7 @@ def main():
     try:
         while True:
             # Run one iteration of the workflow
-            result = app.invoke(current_state, config)
-
-            # Handle None result (when workflow reaches END)
-            if result is None:
-                break
+            result = graph.invoke(current_state, config)
 
             # Update current state with the result
             current_state.update(result)

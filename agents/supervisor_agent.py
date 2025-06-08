@@ -18,9 +18,11 @@ class SupervisorAgent(ReActAgent):
             state,
             f"Session status: {games_played} games played, {total_wins} total wins. Need to present menu options.",
         )
+        print(thought)  # Placeholder to see LLM thinking
 
         # ACT: Display current session stats and menu
         action = self.act(state, "Displaying current session stats and game menu")
+        print(action)  # Placeholder to see LLM acting
 
         # Show current session stats if any games have been played
         if games_played > 0:
