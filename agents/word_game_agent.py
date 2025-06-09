@@ -31,6 +31,24 @@ class WordGameAgent(ReActAgent):
         ]
         self.knowledge_base = []
 
+    def _get_input_with_interrupt_check(self, prompt: str, state: GameState) -> tuple:
+        """Get user input with interrupt and command handling"""
+        try:
+            user_input = input(prompt).strip()
+
+            # Check for interrupt signals
+            if user_input.lower() in ["quit", "q", "exit", "/exit"]:
+                return user_input, True
+
+            # Check for commands
+            if user_input.startswith("/"):
+                return user_input, True
+
+            return user_input, False
+
+        except (KeyboardInterrupt, EOFError):
+            return "interrupt", True
+
     def play(self, state: GameState) -> GameState:
         # THINK: Initialize word guessing strategy
         thought = self.think(
@@ -40,8 +58,24 @@ class WordGameAgent(ReActAgent):
 
         print(f"\nChoose a word from this list:")
         print(", ".join(self.word_list))
+        print("(Type '/help' for commands or '/exit' to return to menu)")
 
-        chosen_word = input("Enter your chosen word: ").strip().lower()
+        chosen_word, interrupted = self._get_input_with_interrupt_check(
+            "Enter your chosen word: ", state
+        )
+
+        if interrupted:
+            if chosen_word == "interrupt":
+                state["action"] = "interrupt"
+                state["interrupted"] = True
+            elif chosen_word.startswith("/"):
+                state["action"] = "command"
+                state["user_input"] = chosen_word
+            else:
+                state["action"] = "menu"
+            return state
+
+        chosen_word = chosen_word.lower()
 
         if chosen_word not in self.word_list:
             observation = self.observe(
@@ -50,6 +84,9 @@ class WordGameAgent(ReActAgent):
             print("Please choose a word from the list.")
             state["action"] = "word_game"
             return state
+
+        # Create checkpoint after word selection
+        state = self.create_checkpoint(state, f"word_selected_{chosen_word}")
 
         # THINK: Plan questioning strategy
         thought = self.think(
@@ -79,11 +116,33 @@ class WordGameAgent(ReActAgent):
             # ACT: Ask question
             action = self.act(state, f"Asking: {question}")
             print(f"\n{question}")
-            answer = input("Answer (yes/no/maybe): ").strip().lower()
+
+            answer, interrupted = self._get_input_with_interrupt_check(
+                "Answer (yes/no/maybe): ", state
+            )
+
+            if interrupted:
+                # Create checkpoint before handling interrupt
+                state = self.create_checkpoint(state, f"word_game_q{i+1}_interrupted")
+
+                if answer == "interrupt":
+                    state["action"] = "interrupt"
+                    state["interrupted"] = True
+                elif answer.startswith("/"):
+                    state["action"] = "command"
+                    state["user_input"] = answer
+                else:
+                    state["action"] = "menu"
+                return state
+
+            answer = answer.lower()
 
             # OBSERVE: Record answer and update knowledge
             observation = self.observe(state, f"Response to '{question}': {answer}")
             self.knowledge_base.append({"question": question, "answer": answer})
+
+        # Create checkpoint before making final guess
+        state = self.create_checkpoint(state, "word_game_making_guess")
 
         # THINK: Analyze collected information to make educated guess
         thought = self.think(
@@ -128,7 +187,22 @@ class WordGameAgent(ReActAgent):
         )
         print(f"\nI think your word is: {guess}")
 
-        correct = input("Was I correct? (yes/no): ").strip().lower()
+        correct, interrupted = self._get_input_with_interrupt_check(
+            "Was I correct? (yes/no): ", state
+        )
+
+        if interrupted:
+            if correct == "interrupt":
+                state["action"] = "interrupt"
+                state["interrupted"] = True
+            elif correct.startswith("/"):
+                state["action"] = "command"
+                state["user_input"] = correct
+            else:
+                state["action"] = "menu"
+            return state
+
+        correct = correct.lower()
 
         # OBSERVE: Record final result
         if correct == "yes":
@@ -146,5 +220,7 @@ class WordGameAgent(ReActAgent):
             )
             print("I was wrong. Good game!")
 
+        # Clear current game state
+        state["current_game"] = None
         state["action"] = "menu"
         return state

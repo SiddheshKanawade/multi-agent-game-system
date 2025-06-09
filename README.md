@@ -1,74 +1,172 @@
-# Simple Multi-Agent Game System (ReAct Design)
+# Multi-Agent Game System
 
 A streamlined LangGraph-based multi-agent system implementing **ReAct (Reasoning, Acting, Observing)** design pattern for playing two interactive games.
 
 ## Features
 
-- **ReAct Agent Design**: All agents follow Think → Act → Observe pattern
-- **Number Guessing Game**: AI uses binary search with reasoning to guess your number (1-100)
-- **Word Clue Game**: AI uses strategic questioning with analysis to guess your chosen word
-- **Session Stats**: Tracks wins and games played per session
-- **Simple CLI**: Easy-to-use command line interface with agent reasoning logs
+### Command Agent
 
-## Requirements
+- **Structured Command Interpretation**: Dedicated agent for parsing and executing user commands
+- **Intent Recognition**: Maps commands to appropriate agent behaviors
+- **Extensible Command System**: Easy to add new commands and functionality
 
-- Python 3.12
-- LangGraph
+### Interrupt/Resume Logic
 
-## Installation
+- **Graceful Interruption**: Handle Ctrl+C and unexpected exits cleanly
+- **Session Persistence**: Automatic saving of session state
+- **Resume Capability**: Continue interrupted sessions seamlessly
+- **Dynamic Checkpoints**: Pause and resume flows at any point
 
-1. Install dependencies:
+### Session Management
 
-```bash
-pip install -r requirements.txt
-```
+- **Automatic Checkpoints**: Created before critical game actions
+- **Session History**: List and manage multiple saved sessions
 
-2. Run the game:
+## 📋 Available Commands
+
+| Command   | Description                                 |
+| --------- | ------------------------------------------- |
+| `/help`   | Show available commands                     |
+| `/status` | Show current session status                 |
+| `/save`   | Save current session with custom name       |
+| `/load`   | Load a saved session                        |
+| `/list`   | List all saved sessions                     |
+| `/resume` | Resume the most recent session              |
+| `/pause`  | Pause and save current session              |
+| `/switch` | Switch between game types or return to menu |
+| `/clear`  | Clear current session stats                 |
+| `/exit`   | Exit with save options                      |
+
+## Game Features
+
+### Word Game Agent
+
+- Strategic questioning using ReAct pattern
+- Knowledge base building
+- Interrupt handling during gameplay
+- Checkpoint creation at key decision points
+
+### Number Game Agent
+
+- Binary search optimization
+- Range tracking with checkpoints
+- Mid-game interruption support
+- Resume from exact game state
+
+### Supervisor Agent
+
+- Session flow management
+- Statistics tracking
+- Interrupt signal handling
+- Graceful shutdown coordination
+
+## Quick Start
+
+### Starting the Game System
 
 ```bash
 python game.py
 ```
 
-## How to Play
+### Example Session
 
-1. **Choose a game** (1 for Number Game, 2 for Word Game, or blank to exit)
-2. **Number Game**: Think of a number 1-100, answer "yes", "higher", or "lower"
-3. **Word Game**: Pick a word from the list, answer the AI's questions with "yes", "no", or "maybe"
-4. **Exit** to see session summary
+```
+$ python game.py
+====================================================
+  Welcome to the Enhanced Multi-Agent Game System!
+  Features: Command handling, Interrupt/Resume, Checkpoints
+====================================================
 
-## ReAct Architecture
+Found 2 saved session(s).
+Would you like to resume a previous session? (y/N): y
 
-### Base ReAct Agent Pattern
+Choose a game:
+1. Number Game
+2. Word Game
+Type '/help' for commands or leave blank to exit
+Choice: /status
 
-Each agent follows the ReAct methodology:
+Current Session Status:
+Session ID: abc123-def456
+Number Games Played: 2
+Word Games Played: 1
+Number Game Wins: 1
+Word Game Wins: 0
+Current Action: menu
+```
 
-- **🧠 THINKING**: Analyze current situation and plan next move
-- **🎯 ACTING**: Execute the planned action
-- **👁️ OBSERVING**: Record results and learn from outcomes
+## 🔧 Technical Implementation
 
-### Agent Implementations
+### State Management
 
-- **SupervisorAgent**:
+The enhanced `GameState` includes:
 
-  - _Thinks_: Analyzes session stats and user choices
-  - _Acts_: Displays menus and routes to appropriate games
-  - _Observes_: Tracks user decisions and game outcomes
+- `interrupted`: Flag for handling interruptions
+- `current_game`: Track active game type
+- `checkpoint_data`: Serializable game state
+- `last_checkpoint`: Reference to last saved state
+- `resumable`: Indicates if session can be resumed
 
-- **NumberGameAgent**:
+### Interrupt Handling
 
-  - _Thinks_: Calculates optimal binary search strategy
-  - _Acts_: Makes educated guesses based on range analysis
-  - _Observes_: Adjusts search range based on user feedback
+1. **Signal Handlers**: Capture SIGINT/SIGTERM gracefully
+2. **Command Detection**: Recognize quit/exit commands
+3. **Checkpoint Creation**: Auto-save before interruption
+4. **Recovery Options**: Offer save/resume choices
 
-- **WordGameAgent**:
-  - _Thinks_: Plans strategic questions to narrow possibilities
-  - _Acts_: Asks targeted questions and makes educated guesses
-  - _Observes_: Builds knowledge base from answers for better guessing
+### Command Processing
 
-### LangGraph Orchestration
+1. **Input Analysis**: Parse user input for commands vs game choices
+2. **Command Routing**: Direct to appropriate handler methods
+3. **State Modification**: Update game state based on command
+4. **Flow Control**: Route back to appropriate game state
 
-- **State Management**: Maintains game state across agent interactions
-- **Workflow Routing**: Directs flow between agents based on user choices
-- **Memory**: Persists session data using LangGraph checkpointer
+## Error Handling
 
-Simple, clean, and intelligently designed!
+- **Graceful Degradation**: System continues operating with partial failures
+- **Emergency Saves**: Auto-save on unexpected errors
+- **Recovery Mechanisms**: Resume from last known good state
+- **User Feedback**: Clear error messages and recovery options
+
+## 🎯 Usage Examples
+
+### Save and Resume
+
+```bash
+# During gameplay
+Choice: /save important_session
+Session saved as important_session.json
+
+# Later
+Choice: /load
+Available sessions:
+1. important_session.json
+2. session_abc123.json
+Enter session number to load: 1
+Session loaded from important_session.json
+```
+
+### Interrupt Handling
+
+```bash
+# Press Ctrl+C during gameplay
+^C
+Session interrupted. Would you like to:
+1. Save and exit
+2. Exit without saving
+3. Continue playing
+Choose (1-3): 1
+Session saved as session_abc123.json
+```
+
+### Command Usage
+
+```bash
+Choice: /help
+Available commands:
+  /resume    - Resume a previous game session
+  /switch    - Switch between different game types
+  /pause     - Pause current session and save state
+  /exit      - Exit the current game
+  ...
+```
